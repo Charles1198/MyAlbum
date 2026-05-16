@@ -110,50 +110,6 @@
     "takenAt": "2026-05-02T05:32:49.000Z"
   },
   {
-    "id": "99972fb2-2169-40fa-a23f-d6fb758f0235",
-    "title": "DSC_0458",
-    "description": "",
-    "images": {
-      "original": "photos/original/99972fb2-2169-40fa-a23f-d6fb758f0235.jpg",
-      "thumbnail": "photos/thumbnail/99972fb2-2169-40fa-a23f-d6fb758f0235.jpg"
-    },
-    "exif": {
-      "camera": "NIKON CORPORATION NIKON Z50_2",
-      "lens": "NIKKOR Z DX 16-50mm f/3.5-6.3 VR",
-      "focalLength": "50mm",
-      "aperture": "f/6.3",
-      "shutter": "1/250",
-      "iso": 250
-    },
-    "isPublic": true,
-    "createdAt": "2026-05-16T07:21:52.878Z",
-    "updatedAt": "2026-05-16T08:48:15.746Z",
-    "order": 0,
-    "takenAt": "2026-05-02T05:43:51.000Z"
-  },
-  {
-    "id": "bcf7e24c-50d0-44f1-a4bc-b4299cd643fa",
-    "title": "DSC_0572",
-    "description": "",
-    "images": {
-      "original": "photos/original/bcf7e24c-50d0-44f1-a4bc-b4299cd643fa.jpg",
-      "thumbnail": "photos/thumbnail/bcf7e24c-50d0-44f1-a4bc-b4299cd643fa.jpg"
-    },
-    "exif": {
-      "camera": "NIKON CORPORATION NIKON Z50_2",
-      "lens": "NIKKOR Z DX 16-50mm f/3.5-6.3 VR",
-      "focalLength": "48mm",
-      "aperture": "f/7.1",
-      "shutter": "1/400",
-      "iso": 100
-    },
-    "isPublic": true,
-    "createdAt": "2026-05-16T07:21:43.778Z",
-    "updatedAt": "2026-05-16T08:48:15.754Z",
-    "order": 0,
-    "takenAt": "2026-05-03T09:05:51.000Z"
-  },
-  {
     "id": "a6700910-778c-4518-9656-015c87106f50",
     "title": "MVIMG_20260502_131405",
     "description": "",

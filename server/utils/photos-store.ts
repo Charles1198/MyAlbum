@@ -51,7 +51,6 @@ export async function writePhotosJson(next: Photo[], opts?: { ifMatch?: string }
   const oss = getOssClient()
   if (oss) {
     const headers: Record<string, string> = { 'Content-Type': 'application/json; charset=utf-8' }
-    if (opts?.ifMatch) headers['If-Match'] = opts.ifMatch
     const res = await oss.put(PHOTOS_JSON_KEY, Buffer.from(`${raw}\n`, 'utf8'), { headers })
     const etag = String(res.res.headers.etag ?? '')
     return { etag }
