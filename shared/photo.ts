@@ -8,6 +8,8 @@ export type Photo = {
   images?: {
     original?: string
     thumbnail?: string
+    large?: string
+    largeWebp?: string
   }
   exif?: {
     camera?: string

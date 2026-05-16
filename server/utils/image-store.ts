@@ -25,7 +25,12 @@ export async function saveOriginal(params: { id: string; ext: string; buffer: Bu
   const key = `photos/original/${params.id}.${params.ext}`
   const oss = getOssClient()
   if (oss) {
-    await oss.put(key, params.buffer, { headers: { 'Content-Type': contentTypeOfExt(params.ext) } })
+    await oss.put(key, params.buffer, {
+      headers: {
+        'Content-Type': contentTypeOfExt(params.ext),
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    })
     return { key }
   }
 
@@ -40,12 +45,17 @@ export async function saveThumbnail(params: { id: string; buffer: Buffer }) {
   const thumb = await sharp(params.buffer)
     .rotate()
     .resize({ width: 600, withoutEnlargement: true })
-    .jpeg({ quality: 82 })
+    .jpeg({ quality: 82, progressive: true })
     .toBuffer()
 
   const oss = getOssClient()
   if (oss) {
-    await oss.put(key, thumb, { headers: { 'Content-Type': 'image/jpeg' } })
+    await oss.put(key, thumb, {
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    })
     return { key, buffer: thumb }
   }
 
@@ -53,4 +63,37 @@ export async function saveThumbnail(params: { id: string; buffer: Buffer }) {
   await fs.mkdir(path.dirname(filePath), { recursive: true })
   await fs.writeFile(filePath, thumb)
   return { key, buffer: thumb }
+}
+
+export async function saveLarge(params: { id: string; buffer: Buffer }) {
+  const jpgKey = `photos/large/${params.id}.jpg`
+  const webpKey = `photos/large/${params.id}.webp`
+
+  const base = sharp(params.buffer).rotate().resize({ width: 2048, withoutEnlargement: true })
+  const jpg = await base.clone().jpeg({ quality: 82, progressive: true }).toBuffer()
+  const webp = await base.clone().webp({ quality: 80 }).toBuffer()
+
+  const oss = getOssClient()
+  if (oss) {
+    await oss.put(jpgKey, jpg, {
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    })
+    await oss.put(webpKey, webp, {
+      headers: {
+        'Content-Type': 'image/webp',
+        'Cache-Control': 'public, max-age=31536000, immutable',
+      },
+    })
+    return { jpgKey, webpKey }
+  }
+
+  const jpgPath = path.join(LOCAL_OSS_ROOT, jpgKey)
+  const webpPath = path.join(LOCAL_OSS_ROOT, webpKey)
+  await fs.mkdir(path.dirname(jpgPath), { recursive: true })
+  await fs.writeFile(jpgPath, jpg)
+  await fs.writeFile(webpPath, webp)
+  return { jpgKey, webpKey }
 }

@@ -11,6 +11,8 @@ const normalizePhoto = (p: Photo): Photo => ({
         ...p.images,
         original: resolveImageUrl(p.images.original),
         thumbnail: resolveImageUrl(p.images.thumbnail),
+        large: resolveImageUrl(p.images.large),
+        largeWebp: resolveImageUrl(p.images.largeWebp),
       }
     : p.images,
 })

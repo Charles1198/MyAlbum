@@ -3,7 +3,7 @@ import { createError, getRequestHeader, readMultipartFormData, setResponseHeader
 import exifr from 'exifr'
 import type { Photo } from '~~/shared/photo'
 import { requireAdmin } from '~~/server/utils/admin-session'
-import { saveOriginal, saveThumbnail } from '~~/server/utils/image-store'
+import { saveLarge, saveOriginal, saveThumbnail } from '~~/server/utils/image-store'
 import { readPhotosJson, removeObjectByKey, writePhotosJson } from '~~/server/utils/photos-store'
 import path from 'node:path'
 
@@ -55,10 +55,15 @@ export default defineEventHandler(async (event) => {
   const original = await saveOriginal({ id, ext, buffer: fileItem.data })
 
   let thumbnail: { key: string } | undefined
+  let large: { jpgKey: string; webpKey: string } | undefined
   try {
     thumbnail = await saveThumbnail({ id, buffer: fileItem.data })
+    large = await saveLarge({ id, buffer: fileItem.data })
   } catch (err) {
     await removeObjectByKey(original.key).catch(() => {})
+    if (thumbnail) await removeObjectByKey(thumbnail.key).catch(() => {})
+    await removeObjectByKey(`photos/large/${id}.jpg`).catch(() => {})
+    await removeObjectByKey(`photos/large/${id}.webp`).catch(() => {})
     throw err
   }
 
@@ -107,7 +112,12 @@ export default defineEventHandler(async (event) => {
     tags,
     takenAt,
     location,
-    images: { original: original.key, thumbnail: thumbnail.key },
+    images: {
+      original: original.key,
+      thumbnail: thumbnail.key,
+      large: large?.jpgKey,
+      largeWebp: large?.webpKey,
+    },
     exif: {
       camera,
       lens,

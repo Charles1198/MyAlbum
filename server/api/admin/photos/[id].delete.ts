@@ -18,9 +18,13 @@ export default defineEventHandler(async (event) => {
   const { etag: nextEtag } = await writePhotosJson(next, { ifMatch })
   setResponseHeader(event, 'etag', nextEtag)
 
-  const keys = [found.images?.original, found.images?.thumbnail].filter(Boolean) as string[]
+  const keys = [
+    found.images?.original,
+    found.images?.thumbnail,
+    found.images?.large,
+    found.images?.largeWebp,
+  ].filter(Boolean) as string[]
   await Promise.all(keys.map((k) => removeObjectByKey(k).catch(() => {})))
 
   return { ok: true }
 })
-

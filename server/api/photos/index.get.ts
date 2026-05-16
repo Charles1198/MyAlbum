@@ -10,6 +10,8 @@ const normalizePhoto = (p: Photo): Photo => ({
         ...p.images,
         original: resolveImageUrl(p.images.original),
         thumbnail: resolveImageUrl(p.images.thumbnail),
+        large: resolveImageUrl(p.images.large),
+        largeWebp: resolveImageUrl(p.images.largeWebp),
       }
     : p.images,
 })
@@ -18,6 +20,8 @@ const toSortableTime = (p: Photo) => p.takenAt ?? p.createdAt ?? p.updatedAt ?? 
 
 export default defineEventHandler(async (event) => {
   const { photos, etag } = await readPhotosJson()
+
+  setResponseHeader(event, 'cache-control', 'public, max-age=60, stale-while-revalidate=300')
 
   const ifNoneMatch = getRequestHeader(event, 'if-none-match')
   if (ifNoneMatch && ifNoneMatch === etag) {

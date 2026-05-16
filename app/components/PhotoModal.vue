@@ -62,15 +62,18 @@
                 class="absolute inset-0 h-full w-full select-none object-contain opacity-60 blur-sm"
                 decoding="async"
               />
-              <img
-                v-if="fullSrc"
-                :key="fullSrc"
-                :src="fullSrc"
-                class="relative max-h-full max-w-full select-none object-contain opacity-0 transition-opacity duration-300 ease-out"
-                :class="{ 'opacity-100': fullLoaded }"
-                decoding="async"
-                @load="fullLoaded = true"
-              />
+              <picture v-if="fullJpg || fullWebp">
+                <source v-if="fullWebp" :srcset="fullWebp" type="image/webp" />
+                <img
+                  :key="fullJpg || fullWebp"
+                  :src="fullJpg || fullWebp"
+                  class="relative max-h-full max-w-full select-none object-contain opacity-0 transition-opacity duration-300 ease-out"
+                  :class="{ 'opacity-100': fullLoaded }"
+                  decoding="async"
+                  fetchpriority="high"
+                  @load="fullLoaded = true"
+                />
+              </picture>
             </div>
 
             <div class="w-full shrink-0 border-t border-white/10 p-4 text-sm text-neutral-200 lg:w-96 lg:border-l lg:border-t-0">
@@ -119,20 +122,20 @@ const emit = defineEmits<{
 }>()
 
 const thumbSrc = computed(() => props.photo?.images?.thumbnail ?? '')
-const fullSrc = computed(() => props.photo?.images?.original ?? props.photo?.images?.thumbnail ?? '')
+const fullJpg = computed(
+  () =>
+    props.photo?.images?.large ??
+    props.photo?.images?.original ??
+    props.photo?.images?.thumbnail ??
+    '',
+)
+const fullWebp = computed(() => props.photo?.images?.largeWebp ?? '')
 const fullLoaded = ref(false)
 
 watch(
-  () => fullSrc.value,
-  (src) => {
+  () => [fullJpg.value, fullWebp.value],
+  () => {
     fullLoaded.value = false
-    if (!import.meta.client) return
-    if (!src) return
-    const img = new Image()
-    img.onload = () => {
-      fullLoaded.value = true
-    }
-    img.src = src
   },
   { immediate: true },
 )
