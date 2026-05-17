@@ -3,6 +3,7 @@ import { createError, getRequestHeader, readMultipartFormData, setResponseHeader
 import exifr from 'exifr'
 import type { Photo } from '~~/shared/photo'
 import { requireAdmin } from '~~/server/utils/admin-session'
+import { autoTagFromThumbnail } from '~~/server/utils/auto-tag'
 import { saveLarge, saveOriginal, saveThumbnail } from '~~/server/utils/image-store'
 import { readPhotosJson, removeObjectByKey, writePhotosJson } from '~~/server/utils/photos-store'
 import path from 'node:path'
@@ -54,7 +55,7 @@ export default defineEventHandler(async (event) => {
   const ext = extFromFilename(fileItem.filename)
   const original = await saveOriginal({ id, ext, buffer: fileItem.data })
 
-  let thumbnail: { key: string } | undefined
+  let thumbnail: { key: string; buffer: Buffer } | undefined
   let large: { jpgKey: string; webpKey: string } | undefined
   try {
     thumbnail = await saveThumbnail({ id, buffer: fileItem.data })
@@ -105,11 +106,28 @@ export default defineEventHandler(async (event) => {
   const isoValue = exifData?.ISO ?? exifData?.PhotographicSensitivity
   const iso = typeof isoValue === 'number' ? isoValue : undefined
 
+  const auto = thumbnail?.buffer
+    ? await autoTagFromThumbnail({
+        thumbnailJpeg: thumbnail.buffer,
+        existingDescription: description || undefined,
+        existingTags: tags,
+      })
+    : null
+
+  const finalDescription = description || auto?.description || undefined
+  const mergedTags = (() => {
+    const set = new Set<string>()
+    for (const t of tags ?? []) set.add(t)
+    for (const t of auto?.tags ?? []) set.add(t)
+    const list = Array.from(set).filter(Boolean)
+    return list.length ? list : undefined
+  })()
+
   const nextPhoto: Photo = {
     id,
     title,
-    description,
-    tags,
+    description: finalDescription,
+    tags: mergedTags,
     takenAt,
     location,
     images: {
